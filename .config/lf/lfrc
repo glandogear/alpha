@@ -1,0 +1,87 @@
+### 选项配置
+set dircounts               # 目录大小显示为内含文件个数
+set findlen         0       # 不限制查找字符长度
+set hiddenfiles     ".*:*.log"  # 视为隐藏文件
+set incsearch               # 搜索时即时跳转
+set number                  # 行号
+set previewer               # 预览器
+set ratios          '2:3'   # 面板比例
+set relativenumber          # 相对行号
+set scrolloff       10      # 滚动预留行数
+set shellopts       '-eu'   # 执行命令时的附加选项
+set timefmt         '2006/01/02 15:04:05'   # 底部时间格式
+set wrapscroll              # 循环滚动
+
+### lf动态配置
+map b
+map bp :set preview!        # 切换预览
+
+### 终端与执行命令
+map w
+map wt &setsid $TERMINAL    # 打开新终端
+map wf &setsid $TERMINAL -e lf  # 打开新终端
+map W $$SHELL               # 当前窗口打开命令行
+map <enter> shell-wait      # 运行命令
+
+### 打开文件
+map x !$f                   # 执行
+map o $setsid mimeopen --ask "$f"           # 使用..打开
+map O $setsid mimeopen --ask-default "$f"   # 修改默认打开方式
+# 默认打开方式，l调用
+cmd open &{{
+    case  $(file --mime-type --brief $f) in
+        text/*) setsid $TERMINAL -e $EDITOR "$f" ;;
+        *) setsid $OPENER "$f" ;;
+    esac
+}}
+
+### 删除
+map d
+map dd $trash-put $fx               # 删除文件
+map dc :cut                         # 剪切文件
+
+### 创建
+map tf push $touch<space>           # 创建新文件
+map td push $mkdir<space>-p<space>  # 创建新目录
+map ts push $ln<space>-s<space>     # 创建新链接
+
+### 修改文件
+map r
+map rr rename
+map ra push rr<c-u>                 # 重命名，完全重新命名
+map rf push rr<a-b><a-b><a-f><c-u>  # 重命名，修改文件名
+map re push rr<a-b><c-k>            # 重命名，修改扩展名
+
+map i
+map ii !clear && file $f                     # 文件信息
+# map im :push $chmod<space>$f<a-b><c-b><c-b><space>  # 修改权限
+map im %{{                          # 修改权限
+    printf "chmod files: "
+    read MODE
+    chmod -R $MODE $fx
+    lf -remote "send $id reload"
+}}
+map ix :${{chmod +x $f}};reload     # 添加执行权限
+
+### 书签
+
+### 预览
+
+### 压缩文件
+map a
+map al !clear && atool -l $f        # 列出压缩包内容
+map aa !{{                          # 添加压缩包
+    set -f
+    clear
+    printf "Archive name: "
+    read ANAME
+    atool -a "$ANAME" $fx
+    lf -remote "send $id unselect"
+}}
+map ax !{{                          # 解压缩选中文件至当前目录
+    set -f
+    clear
+    atool -x $fx
+}}
+
+
